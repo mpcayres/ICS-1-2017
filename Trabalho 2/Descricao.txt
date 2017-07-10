@@ -1,0 +1,398 @@
+Escreva um programa que:
+
+1. Use o pacote sintese (*) para escrever um programa que implemente os 
+instrumentos A e B assim descritos: 
+
+	A: Contém um oscilador cuja entrada de amplitude é a saída de um 
+	gerador de envoltória, e cuja entrada de frequência é a saída de 
+	um instrumento aditivo de três harmônicos (ex. 1, 2, 5) cujas envoltórias
+	são diferentes. 
+
+	B: Contém um oscilador cuja entrada de amplitude é a saída de um 
+	gerador de ruído, e cuja entrada de frequência é um outro gerador de 
+	ruído (diferente quanto à parametrização). 
+
+2. E que toquem melodias ou efeitos.
+	-- Consultar as classes do pacote sintese que contêm melodias e escalas.
+	-- (ColecaoDeFrases e Escala)
+
+3. Considere a lista abaixo como sendo o conteúdo mínimo de componentes
+na interface gráfica:
+	-- Controle dos parâmetros dos instrumentos A e B.
+	-- (Parâmetros: unidades-h, frequência de corte, etc.)
+	-- Música (arquivo) 
+	-- Notas;
+
+(*) Trata-se de um dos pacotes da API som_a. 
+
+[Nota: Construída no Laboratório de Processamento Espectral do CIC/UnB, a API som_a 
+se desenvolve desde a década de 1980. Enquanto API, som_a consta de um grupo 
+de classes que implementam os algoritmos fundamentais em Java. 
+
+-- Se for o caso de escrever o trabalho em Java, faça download de sintese 
+(última versão: 09/04/2016) . -> Coloquei na pasta: "sintese.jar"
+
+-- Consulte a documentação. -> http://www.cic.unb.br/~lcmm/cic/ics/trabalhos/sintese/javadoc/
+
+-- Veja os programas demonstrativos na página da aula correspondente. (12 a 16?)
+
+
+Entrega de T2 
+
+1. Dimensione convenientemente a quantidade de memória (heap size) em Java;
+2. Prepare o NetBeans com mais memória; 
+3. Consulte a documentação de sintese; 
+4. Faça download da versão de 2012.
+
+1. Heap size em linha de comando: 
+	Por exemplo, para um tamanho inicial de 1G; e um 
+	tamanho máximo de 1.5G, deve-se escrever:
+
+		java -Xms1024M -Xmx1624M SeuPrograma
+
+	ou 
+
+		java -Xms1024M -Xmx1624M -jar seuprograma.jar
+
+2. Heap size no NetBeans: 
+
+	File --: Project Properties --: Categories: run --: 
+			 VM options: (preencher com) -Xms1024M -Xmx1624M --: 
+			 botão "OK"
+
+------------------------------------------------------
+
+Demosntrações de classes encontradas no site do prof:
+
+/*Oscilador - Capítulo 14*/
+import sintese.*;
+
+class D0  
+{   
+   Oscilador o1;
+      
+   public D0()
+   { 
+     o1 = new Oscilador(10, 180, 90);
+
+     Som som = new Som(o1, 0.5f, "simples.wav");
+     som.salvawave();
+     som.tocawave();
+   }
+      
+   public static void main(String args[])
+   { new D0();
+   }   
+}
+
+/*Envoltória - Capítulo 15*/
+import sintese.*;
+
+class D20  
+{   
+   Curva      curva1, curva2; 
+   Oscilador  o1;
+   Envoltoria env1 = new Envoltoria();
+   Envoltoria env2 = new Envoltoria();
+     
+
+   public D20()
+   { 
+     curva1 = new Curva(720);     
+     curva1.addPonto(0f, 0f);
+     curva1.addPonto(10f, 1000f);
+     curva1.addPonto(600f, 300f);
+     curva1.addPonto(720f, 0f);     
+
+     curva2 = new Curva(720);     
+     curva2.addPonto(  0f, 330f);     
+     curva2.addPonto(720f, 330f);     
+
+     env1.setCURVA(curva1);    
+     env2.setCURVA(curva2);    
+  
+     env1.setGanho(1f);
+     env1.setGanho(2f);    
+     o1 = new Oscilador(env1, env2);
+
+     Som som = new Som(o1, 1.5f, "simples");
+     som.salvawave();
+     som.tocawave();
+   }
+      
+   public static void main(String args[])
+   { new D20();
+   }   
+}
+
+/*UnidadeH - Capítulo 16*/
+import sintese.*;
+
+public class UH01
+{  
+   UnidadeH    uh; 
+   Envoltoria  env;     
+   Curva       curva;      
+         
+   public UH01()
+   { 
+     uh    = new UnidadeH(); 
+     env   = new Envoltoria(); 
+
+     curva = new Curva(720);     
+     curva.addPonto(0f, 0f);
+     curva.addPonto(10f, 1000f);
+     curva.addPonto(200f, 300f);
+     curva.addPonto(720f, 0f);
+
+     env.setCURVA(curva);
+     
+     uh.setEnvoltoria(env);
+     uh.setH(1);
+     uh.setLambda(0.25f);
+     uh.setFase(90f);
+     uh.setGanho(32);
+
+     uh.setFrequencia(150);
+    
+     Som soma = new Som(uh, 2.5f);     
+     soma.setNome("UH01");
+     soma.visualiza();
+         
+     try{ System.in.read();
+          System.exit(0);
+        }
+     catch(Exception e){};
+   }
+            
+   public static void main(String args[])
+   { new UH01();
+   }   
+}
+
+/*Instrumento Aditivo - Capítulo 16*/
+import sintese.*;
+
+public class E13c
+{  Curva   curva1, curva2, curva3;      
+   Envoltoria   env1   = new Envoltoria();   
+   Envoltoria   env2   = new Envoltoria();   
+   Envoltoria   env3   = new Envoltoria();   
+   UnidadeH     uh1    = new UnidadeH();
+   UnidadeH     uh2    = new UnidadeH();
+   UnidadeH     uh3    = new UnidadeH();
+   InstrumentoAditivo ins;   
+   
+   public E13c()
+   { curva1 = new Curva(720);     
+     curva1.addPonto(0f, 0f);
+     curva1.addPonto(10f, 1000f);
+     curva1.addPonto(200f, 300f);
+     curva1.addPonto(720f, 0f);
+
+     curva2 = new Curva(720);     
+     curva2.addPonto(0f, 0f);
+     curva2.addPonto(8f, 400f);
+     curva2.addPonto(240f, 300f);
+     curva2.addPonto(720f, 0f);
+
+     curva3 = new Curva(720);     
+     curva3.addPonto(0f, 0f);
+     curva3.addPonto(5f,  300f);
+     curva3.addPonto(720f, 0f);
+
+     env1.setCURVA(curva1);
+     env2.setCURVA(curva2);
+     env3.setCURVA(curva2);
+  
+     uh1.setEnvoltoria(env1);
+     uh1.setH(1);
+     uh1.setLambda(0.5f);
+     uh1.setFase(90f);
+     uh1.setGanho(4);
+
+     uh2.setEnvoltoria(env2);
+     uh2.setH(3);
+     uh2.setLambda(0.5f);
+     uh2.setFase(0f);
+     uh2.setGanho(4);
+     
+     uh3.setEnvoltoria(env3);
+     uh3.setH(4);
+     uh3.setLambda(0.5f);
+     uh3.setFase(120f);
+     uh3.setGanho(4);
+
+     ins = new InstrumentoAditivo();
+
+     ins.setFrequencia(110);
+     ins.addUnidade(uh1);
+     ins.addUnidade(uh2);
+     ins.addUnidade(uh3);
+     ins.setGanho(6);
+
+     Som soma = new Som(ins, 2.5f);
+     soma.salvawave();
+     soma.visualiza();
+
+     try{ System.in.read();
+          System.exit(0);
+        }
+     catch(Exception e){};
+   }
+            
+   public static void main(String args[])
+   { new E13c();
+   }   
+
+}
+
+/*Ruído - Capítulo 16*/
+import sintese.*;
+
+class Alea01  
+{   
+   Ruido r;
+      
+   public Alea01()
+   { 
+     r = new Ruido(10, 1000, 0);
+
+     Som som = new Som(r, 1.5f);     
+     som.setNome("Alea");
+     som.visualiza();
+   }
+      
+   public static void main(String args[])
+   { new Alea01();
+   }   
+}
+
+/*UnidadeF - Capítulo 16*/
+import sintese.*;
+
+public class UF02
+{  
+   UnidadeF     uf;
+   Envoltoria   env;   
+   Curva        curva;      
+   
+   public UF02()
+   { 
+     uf    = new UnidadeF();
+     env   = new Envoltoria(); 
+     curva = new Curva(720);     
+
+     curva.addPonto(0f, 0f);
+     curva.addPonto(30f, 400f);
+     curva.addPonto(240f, 300f);
+     curva.addPonto(720f, 0f);
+
+     env.setCURVA(curva);
+           
+     uf.setEnvoltoria(env);
+     uf.setH(3);
+     uf.setLambda(0.5f);
+     uf.setFase(0f);
+     uf.setGanho(103);          
+     uf.setSeletividade(0.00052);        
+     uf.setFrequencia(55);
+
+     Som soma = new Som(uf, 0.4f);     
+     soma.setNome("UF");
+     soma.visualiza();
+     
+     try{ System.in.read();
+          System.exit(0);
+        }
+     catch(Exception e){};
+   }      
+      
+   public static void main(String args[])
+   { new UF02();
+   }   
+
+}
+
+/*InstrumentoFormantico - Capítulo 16*/
+import sintese.*;
+
+public class Vogal_IH_02
+{  
+   Curva   curva1, curva2, curva3;      
+   Envoltoria   env1   = new Envoltoria();   
+   Envoltoria   env2   = new Envoltoria();   
+   Envoltoria   env3   = new Envoltoria();   
+   UnidadeF     uf1    = new UnidadeF();
+   UnidadeF     uf2    = new UnidadeF();
+   UnidadeF     uf3    = new UnidadeF();
+   
+   InstrumentoFormantico ins;   
+   
+   public Vogal_IH_02()
+   { curva1 = new Curva(720);     
+     curva1.addPonto(0f, 0f);
+     curva1.addPonto(40f, 1000f);
+     curva1.addPonto(200f, 300f);
+     curva1.addPonto(720f, 0f);
+
+     curva2 = new Curva(720);     
+     curva2.addPonto(0f, 0f);
+     curva2.addPonto(30f, 400f);
+     curva2.addPonto(240f, 300f);
+     curva2.addPonto(720f, 0f);
+
+     curva3 = new Curva(720);     
+     curva3.addPonto(0f, 0f);
+     curva3.addPonto(20f,  300f);
+     curva3.addPonto(720f, 0f);
+
+     env1.setCURVA(curva1);
+     env2.setCURVA(curva2);
+     env3.setCURVA(curva2);
+  
+     uf1.setEnvoltoria(env1);
+     uf1.setH(1);
+     uf1.setLambda(0.5f);
+     uf1.setFase(90f);
+     uf1.setGanho(4);
+
+     uf2.setEnvoltoria(env2);
+     uf2.setH(6);
+     uf2.setLambda(0.5f);
+     uf2.setFase(0f);
+     uf2.setGanho(2);
+     
+     uf3.setEnvoltoria(env3);
+     uf3.setH(9);
+     uf3.setLambda(0.5f);
+     uf3.setFase(120f);
+     uf3.setGanho(2);
+     
+     uf1.setSeletividade(0.00013);
+     uf2.setSeletividade(0.000012);
+     uf3.setSeletividade(0.000011);
+          
+     ins = new InstrumentoFormantico();
+
+     ins.setFrequencia(220);
+     ins.addUnidade(uf1);
+     ins.addUnidade(uf2);
+     ins.addUnidade(uf3);
+
+     ins.setGanho(16);
+
+     Som soma = new Som(ins, 1.5f);     
+     soma.setNome("Vogal_IH_02");
+     soma.visualiza();
+     
+     try{ System.in.read();
+          System.exit(0);
+        }
+     catch(Exception e){};
+   }     
+      
+   public static void main(String args[])
+   { new Vogal_IH_02();
+   }   
+}
